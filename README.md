@@ -117,9 +117,8 @@ The dashboard displays:
 
 1. **Interactive Map** - Real-time vessel positions with clustering
 2. **Vessel List** - Name, MMSI, position, speed, type, destination
-3. **Status Indicators** - 🌊 In transit or ⚓ At port
-4. **Performance Metrics** - Connection status, vessel count, update rate
-5. **Search Results** - Filter by any vessel attribute
+3. **Performance Metrics** - Connection status, vessel count, update rate
+4. **Search Results** - Filter by any vessel attribute
 
 ---
 
