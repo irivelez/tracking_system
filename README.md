@@ -140,6 +140,7 @@ The dashboard displays:
 - **Data accuracy** - Depends on vessel AIS transmission quality
 - **No persistence** - Current version doesn't store historical data
 - **Network required** - Needs stable internet for WebSocket connection
+- **No info from vessels in transit** - Just only gathering information from vessels at ports
 
 > **Note:** This system tracks vessels in real-time but doesn't store historical data. For trajectory analysis and historical tracking, add database persistence.
 
