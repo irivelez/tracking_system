@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LATAM Vessel Tracking System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LATAM Vessel Tracking System</h1>
+            <div class="status">
+                <span id="connection-status" class="status-indicator disconnected">Disconnected</span>
+                <span id="vessel-count">Vessels: 0</span>
+                <span id="update-rate" class="update-info">Updates: 0/s</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Map Section -->
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+
+            <!-- Vessel List Section -->
+            <div class="vessel-list-container">
+                <h2>Active Vessels</h2>
+                <div class="filter-controls">
+                    <input type="text" id="search-vessel" placeholder="Search by name, MMSI, or destination...">
+                </div>
+                <div id="vessel-list" class="vessel-list">
+                    <div class="no-vessels">Waiting for vessel data...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
