@@ -123,17 +123,6 @@ The dashboard displays:
 
 ---
 
-## Why This Exists
-
-Maritime tracking is essential for logistics, port operations, and shipping analysis. This project demonstrates:
-
-- **Real-time monitoring** - Track vessels across entire LATAM region
-- **Performance** - Handle 500-2000 AIS messages/minute efficiently
-- **Scalability** - Smart filtering and batching for smooth operation
-- **Accessibility** - Free tier AISstream API, open-source code
-
----
-
 ## Features
 
 ✅ **High performance** - 90% reduction in network traffic via batching
@@ -145,80 +134,14 @@ Maritime tracking is essential for logistics, port operations, and shipping anal
 
 ---
 
-## Performance Optimizations
-
-The system implements professional maritime tracking best practices:
-
-| Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| Network traffic | 500-2000 msg/min | 50-200 msg/min | **90% reduction** |
-| CPU usage | 40-60% | 10-20% | **70% reduction** |
-| Map FPS | 10-20 fps | 50-60 fps | **3x faster** |
-| UI render time | 500ms | 50ms | **10x faster** |
-
-**Techniques:**
-- Backend batching (updates every 2 seconds)
-- Position change threshold (~100m minimum)
-- Time-based filtering (max 1 update/vessel/10 sec)
-- Frontend debouncing
-- Lazy loading on connection
-
----
-
-## Configuration
-
-### Performance Tuning
-
-Edit `app.py` (lines 39-41):
-```python
-UPDATE_BATCH_INTERVAL = 2.0    # Seconds between batches
-MIN_POSITION_CHANGE = 0.001    # Minimum movement (~100m)
-MIN_UPDATE_INTERVAL = 10.0     # Min seconds per vessel update
-```
-
-### Add Regions/Ports
-
-Edit `ports_config.py`:
-```python
-MARITIME_REGIONS = {
-    "New_Region": {
-        "name": "Region Name",
-        "bbox": [[south_lat, west_lon], [north_lat, east_lon]],
-        "description": "Coverage description"
-    }
-}
-
-MAJOR_PORTS = {
-    "New_Port": {
-        "name": "Port Name",
-        "bbox": [[min_lat, min_lon], [max_lat, max_lon]],
-        "region": "Associated_Region"
-    }
-}
-```
-
----
-
 ## Limitations
 
-- **API rate limits** - Free tier has monthly message limits
 - **Coverage gaps** - Only tracks within defined bounding boxes
 - **Data accuracy** - Depends on vessel AIS transmission quality
 - **No persistence** - Current version doesn't store historical data
 - **Network required** - Needs stable internet for WebSocket connection
 
 > **Note:** This system tracks vessels in real-time but doesn't store historical data. For trajectory analysis and historical tracking, add database persistence.
-
----
-
-## Statistics
-
-- **Coverage area:** 15+ million km²
-- **Maritime regions:** 10 zones
-- **Major ports:** 23 facilities
-- **Concurrent vessels:** 300-800+
-- **Message rate:** 500-2000/min
-- **Filter efficiency:** 60-80%
 
 ---
 
