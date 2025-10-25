@@ -4,7 +4,7 @@
 
 ---
 
-**⏱️ Build time:** ~2 hours
+**⏱️ Build time:** ~4 hours
 **🤖 Built with:** Python, Flask, AISstream API
 **🎯 Purpose:** Real-time monitoring of maritime traffic across 10 regions and 23+ major LATAM ports
 
