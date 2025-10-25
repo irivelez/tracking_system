@@ -111,12 +111,19 @@ class AISStreamClient:
                 self.vessels[mmsi] = {}
 
             vessel = self.vessels[mmsi]
+
+            # Extract navigational status
+            nav_status = position_report.get("NavigationalStatus", 15)
+            status_info = self.get_navigational_status(nav_status)
+
             vessel.update({
                 "mmsi": mmsi,
                 "latitude": lat,
                 "longitude": lon,
                 "speed": position_report.get("Sog", 0),  # Speed over ground
                 "heading": position_report.get("TrueHeading", position_report.get("Cog", 0)),
+                "navigational_status": status_info["name"],
+                "status_category": status_info["category"],
                 "timestamp": metadata.get("time_utc"),
                 "nearby_port": get_port_by_coordinates(lat, lon)
             })
@@ -170,6 +177,40 @@ class AISStreamClient:
 
         except Exception as e:
             logger.error(f"Error handling static data: {e}")
+
+    def get_navigational_status(self, status_code):
+        """
+        Convert AIS navigational status code to readable name and category.
+        Based on ITU-R M.1371-5 standard.
+
+        Returns dict with 'name' and 'category' for color coding:
+        - underway: Green (vessel is moving)
+        - anchored: Blue (vessel is at anchor)
+        - moored: Red (vessel is moored/stopped)
+        - restricted: Yellow (limited maneuverability)
+        - special: Purple (fishing, dredging, etc.)
+        - unknown: Gray (no status data)
+        """
+        status_map = {
+            0: {"name": "Under way using engine", "category": "underway"},
+            1: {"name": "At anchor", "category": "anchored"},
+            2: {"name": "Not under command", "category": "restricted"},
+            3: {"name": "Restricted maneuverability", "category": "restricted"},
+            4: {"name": "Constrained by draught", "category": "restricted"},
+            5: {"name": "Moored", "category": "moored"},
+            6: {"name": "Aground", "category": "restricted"},
+            7: {"name": "Engaged in fishing", "category": "special"},
+            8: {"name": "Under way sailing", "category": "underway"},
+            9: {"name": "Reserved for future use", "category": "unknown"},
+            10: {"name": "Reserved for future use", "category": "unknown"},
+            11: {"name": "Power-driven vessel towing astern", "category": "underway"},
+            12: {"name": "Power-driven vessel pushing ahead", "category": "underway"},
+            13: {"name": "Reserved for future use", "category": "unknown"},
+            14: {"name": "AIS-SART (Search and Rescue)", "category": "special"},
+            15: {"name": "Undefined", "category": "unknown"}
+        }
+
+        return status_map.get(status_code, {"name": "Unknown", "category": "unknown"})
 
     def get_vessel_type_name(self, type_code):
         """Convert AIS vessel type code to readable name."""

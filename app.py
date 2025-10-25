@@ -35,10 +35,11 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 vessels_data = {}
 vessels_lock = Lock()
 
-# Performance configuration
-UPDATE_BATCH_INTERVAL = 2.0  # Send batched updates every 2 seconds
+# Performance configuration - OPTIMIZED for 1000-1500 vessels
+UPDATE_BATCH_INTERVAL = 3.0  # Send batched updates every 3 seconds (increased from 2.0)
 MIN_POSITION_CHANGE = 0.001  # ~100 meters (0.001 degrees latitude ≈ 111 meters)
-MIN_UPDATE_INTERVAL = 10.0  # Don't update same vessel more than once per 10 seconds
+MIN_UPDATE_INTERVAL = 15.0  # Don't update same vessel more than once per 15 seconds (increased from 10.0)
+MAX_VESSELS_STORED = 2000  # Maximum vessels to keep in memory (prevent memory bloat)
 
 
 class VesselDataManager:
@@ -48,11 +49,13 @@ class VesselDataManager:
         self.vessels = {}
         self.pending_updates = {}
         self.last_sent_data = {}  # Track what we last sent to clients
+        self.last_update_time = {}  # Track last update timestamp for each vessel
         self.lock = Lock()
         self.stats = {
             'total_updates': 0,
             'filtered_updates': 0,
-            'sent_updates': 0
+            'sent_updates': 0,
+            'cleaned_vessels': 0
         }
 
     def should_update_vessel(self, mmsi, vessel_data):
@@ -112,6 +115,9 @@ class VesselDataManager:
                 self.vessels[mmsi] = {}
             self.vessels[mmsi].update(vessel_data)
 
+            # Track last update time for cleanup
+            self.last_update_time[mmsi] = time.time()
+
             # Check if update is significant enough to send
             if self.should_update_vessel(mmsi, vessel_data):
                 self.pending_updates[mmsi] = self.vessels[mmsi].copy()
@@ -138,17 +144,58 @@ class VesselDataManager:
         with self.lock:
             return list(self.vessels.values())
 
+    def cleanup_stale_vessels(self):
+        """
+        Remove vessels that haven't been updated in 6 hours (likely out of coverage area).
+        Also enforce MAX_VESSELS_STORED limit to prevent memory bloat.
+        """
+        with self.lock:
+            current_time = time.time()
+            stale_threshold = 6 * 3600  # 6 hours in seconds
+            vessels_to_remove = []
+
+            # Find stale vessels
+            for mmsi, last_time in self.last_update_time.items():
+                if current_time - last_time > stale_threshold:
+                    vessels_to_remove.append(mmsi)
+
+            # If still over limit, remove oldest vessels
+            if len(self.vessels) > MAX_VESSELS_STORED:
+                # Sort by last update time, oldest first
+                sorted_vessels = sorted(
+                    self.last_update_time.items(),
+                    key=lambda x: x[1]
+                )
+                # Remove oldest vessels beyond the limit
+                excess = len(self.vessels) - MAX_VESSELS_STORED
+                for mmsi, _ in sorted_vessels[:excess]:
+                    if mmsi not in vessels_to_remove:
+                        vessels_to_remove.append(mmsi)
+
+            # Remove vessels
+            for mmsi in vessels_to_remove:
+                self.vessels.pop(mmsi, None)
+                self.last_sent_data.pop(mmsi, None)
+                self.last_update_time.pop(mmsi, None)
+                self.pending_updates.pop(mmsi, None)
+
+            if vessels_to_remove:
+                self.stats['cleaned_vessels'] += len(vessels_to_remove)
+                logger.info(f"Cleaned up {len(vessels_to_remove)} stale vessels. Active: {len(self.vessels)}")
+
     def get_stats(self):
         """Get performance statistics."""
         with self.lock:
             total = self.stats['total_updates']
             filtered = self.stats['filtered_updates']
             sent = self.stats['sent_updates']
+            cleaned = self.stats['cleaned_vessels']
             filter_rate = (filtered / total * 100) if total > 0 else 0
             return {
                 'total_updates': total,
                 'filtered_updates': filtered,
                 'sent_updates': sent,
+                'cleaned_vessels': cleaned,
                 'filter_rate': f"{filter_rate:.1f}%",
                 'active_vessels': len(self.vessels)
             }
@@ -213,6 +260,7 @@ def send_batched_updates():
     This prevents overwhelming the clients with individual updates.
     """
     logger.info("Starting batch update sender...")
+    last_cleanup_time = time.time()
 
     while True:
         try:
@@ -233,6 +281,12 @@ def send_batched_updates():
             if int(time.time()) % 30 == 0:
                 stats = vessel_manager.get_stats()
                 logger.info(f"Performance stats: {stats}")
+
+            # Cleanup stale vessels every 10 minutes
+            current_time = time.time()
+            if current_time - last_cleanup_time > 600:  # 10 minutes
+                vessel_manager.cleanup_stale_vessels()
+                last_cleanup_time = current_time
 
         except Exception as e:
             logger.error(f"Error in batch sender: {e}")

@@ -180,11 +180,32 @@ header h1 {
     background: #f8f9ff;
 }
 
+.vessel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
+}
+
 .vessel-name {
     font-weight: 600;
     font-size: 1.1rem;
     color: #2c3e50;
-    margin-bottom: 0.5rem;
+    flex: 1;
+}
+
+.vessel-status-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 2px solid white;
 }
 
 .vessel-info {
@@ -216,20 +237,97 @@ header h1 {
 }
 
 /* Leaflet marker customization */
-.vessel-marker {
+.vessel-marker-icon {
     background: transparent;
     border: none;
 }
 
+/* Make SVG markers crisp and prevent blur */
+.vessel-marker-icon svg {
+    shape-rendering: geometricPrecision;
+}
+
+/* Custom cluster styling */
+.custom-cluster-icon {
+    background: transparent;
+    border: none;
+}
+
+.custom-cluster {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform-origin: center;
+}
+
+.custom-cluster:hover {
+    transform: scale(1.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Pulse animation for mega clusters */
+.marker-cluster-mega {
+    animation: pulse-cluster 2s infinite;
+}
+
+@keyframes pulse-cluster {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.95;
+    }
+}
+
+/* Size-specific cluster enhancements */
+.marker-cluster-small {
+    font-size: 12px;
+}
+
+.marker-cluster-medium {
+    font-size: 14px;
+}
+
+.marker-cluster-large {
+    font-size: 16px;
+}
+
+.marker-cluster-mega {
+    font-size: 18px;
+    font-weight: 900;
+}
+
 .vessel-popup {
-    min-width: 200px;
+    min-width: 220px;
+}
+
+.vessel-popup .popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 0.5rem;
 }
 
 .vessel-popup .popup-name {
     font-weight: 600;
     font-size: 1rem;
-    margin-bottom: 0.5rem;
     color: #2c3e50;
+    flex: 1;
+}
+
+.vessel-popup .popup-status-badge {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    border: 2px solid white;
 }
 
 .vessel-popup .popup-info {
