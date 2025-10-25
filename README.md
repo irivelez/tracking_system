@@ -15,9 +15,10 @@
 This system provides real-time tracking of maritime vessels across Latin American waters, from the Gulf of Mexico to Argentina. It connects to the AISstream API via WebSocket to receive live AIS (Automatic Identification System) data and displays vessels on an interactive map.
 
 **Key capabilities:**
-- Track 300-800+ vessels simultaneously
-- Monitor vessels both at ports and in transit across ocean
-- Interactive map with clustering for performance
+- Track 1000+ vessels simultaneously with coastal AIS coverage
+- Color-coded vessel status (underway, anchored, moored)
+- Directional arrows showing vessel heading
+- Interactive map with smart clustering for performance
 - Search and filter vessels by name, MMSI, destination, or type
 - Real-time updates with 90% reduction in network traffic
 
@@ -89,7 +90,7 @@ Expected startup: **Under 10 seconds**
 1. **AISstream Client** - Connects via WebSocket to AISstream API
 2. **Data Manager** - Processes position reports and vessel static data
 3. **Smart Filtering** - Only sends significant changes (60-80% filtered out)
-4. **Batch Updates** - Groups updates every 2 seconds for efficiency
+4. **Batch Updates** - Groups updates every 3 seconds for efficiency
 5. **SocketIO Server** - Broadcasts to web clients in real-time
 
 **Frontend:**
@@ -117,8 +118,9 @@ The dashboard displays:
 
 1. **Interactive Map** - Real-time vessel positions with clustering
 2. **Vessel List** - Name, MMSI, position, speed, type, destination
-3. **Performance Metrics** - Connection status, vessel count, update rate
-4. **Search Results** - Filter by any vessel attribute
+3. **Status Indicators** - 🟢 Underway, 🔵 Anchored, 🔴 Moored, ⚠️ Restricted
+4. **Performance Metrics** - Connection status, vessel count, update rate
+5. **Search Results** - Filter by any vessel attribute
 
 ---
 
@@ -126,20 +128,22 @@ The dashboard displays:
 
 ✅ **High performance** - 90% reduction in network traffic via batching
 ✅ **Smart filtering** - Only significant position changes sent to clients
-✅ **Marker clustering** - Smooth map with 1000+ vessels
+✅ **Smart clustering** - Zoom-aware clustering with status-based colors
+✅ **Vessel status tracking** - Real-time AIS NavigationalStatus display
+✅ **Directional markers** - Arrows showing vessel heading and movement
 ✅ **Real-time updates** - Live SocketIO connection
-✅ **Complete coverage** - 15+ million km² of ocean monitored
+✅ **Coastal coverage** - 15+ million km² of coastal waters monitored
 ✅ **Easy to extend** - Add new regions/ports in `ports_config.py`
 
 ---
 
 ## Limitations
 
+- **Coastal coverage only** - Free tier provides terrestrial AIS (~40-60nm offshore)
 - **Coverage gaps** - Only tracks within defined bounding boxes
 - **Data accuracy** - Depends on vessel AIS transmission quality
 - **No persistence** - Current version doesn't store historical data
 - **Network required** - Needs stable internet for WebSocket connection
-- **No info from vessels in transit** - Just only gathering information from vessels at ports
 
 > **Note:** This system tracks vessels in real-time but doesn't store historical data. For trajectory analysis and historical tracking, add database persistence.
 
